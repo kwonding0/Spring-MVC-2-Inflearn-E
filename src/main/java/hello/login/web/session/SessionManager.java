@@ -34,6 +34,17 @@ public class SessionManager {
         response.addCookie(mySessionCookie);
     }
 
+    //세션ID값의 쿠키반환
+    public Cookie findCookie(HttpServletRequest request, String cookieName){
+        if (request.getCookies() == null) {
+            return null;
+        }
+        return Arrays.stream(request.getCookies())
+                .filter(cookie -> cookie.getName().equals(cookieName))
+                .findAny()
+                .orElse(null);
+    }
+
     /*
      * 세션 조회
      */
@@ -43,6 +54,7 @@ public class SessionManager {
             return null;
         }
 
+        //sessionCookie.getValue() : 세션ID
         return sessionStore.get(sessionCookie.getValue());
     }
 
@@ -52,18 +64,8 @@ public class SessionManager {
     public void expire(HttpServletRequest request) {
         Cookie sessionCookie = findCookie(request, SESSION_COOKIE_NAME);
         if(sessionCookie != null){
+            //sessionCookie.getValue() : 세션ID
             sessionStore.remove(sessionCookie.getValue());
         }
-    }
-
-
-    public Cookie findCookie(HttpServletRequest request, String cookieName){
-        if (request.getCookies() == null) {
-            return null;
-        }
-        return Arrays.stream(request.getCookies())
-                .filter(cookie -> cookie.getName().equals(cookieName))
-                .findAny()
-                .orElse(null);
     }
 }

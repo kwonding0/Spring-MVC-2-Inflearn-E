@@ -78,6 +78,7 @@ public class HomeController {
     }
 
     @GetMapping("/")
+    //이미 로그인 된 사용자를 찾을 때 @SessionAttribute 사용
     public String homeLoginV3Spring(@SessionAttribute(name=SessionConst.LOGIN_MEMBER, required = false) Member loginMember, Model model) {
         //세션에 회원 데이터가 없으면 home
         if (loginMember == null) {
