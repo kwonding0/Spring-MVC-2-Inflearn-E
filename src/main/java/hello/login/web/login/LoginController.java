@@ -2,16 +2,16 @@ package hello.login.web.login;
 
 import hello.login.domain.login.LoginService;
 import hello.login.domain.member.Member;
-import hello.login.web.session.SessionConst;
+import hello.login.web.SessionConst;
 import hello.login.web.session.SessionManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -75,7 +75,7 @@ public class LoginController {
         return "redirect:/";
     }
 
-    @PostMapping("/login")
+    /*@PostMapping("/login")*/
     public  String loginV3(@Valid @ModelAttribute LoginForm form, BindingResult bindingResult, HttpServletRequest request){
         if(bindingResult.hasErrors()){
             return "login/loginForm";
@@ -96,6 +96,30 @@ public class LoginController {
         session.setAttribute(SessionConst.LOGIN_MEMBER, loginMember); //세션에 여러개 값 저장 가능
 
         return "redirect:/";
+    }
+
+    @PostMapping("/login")
+    public  String loginV4(@Valid @ModelAttribute LoginForm form, BindingResult bindingResult, @RequestParam(defaultValue = "/") String redirectURL
+            , HttpServletRequest request){
+        if(bindingResult.hasErrors()){
+            return "login/loginForm";
+        }
+
+        Member loginMember = loginService.login(form.getLoginId(), form.getPassword());
+
+        if(loginMember == null){ //이러한 복잡한 글로벌 오류는 어노테이션으로 처리가 어렵기 때문에 코드로 작성
+            bindingResult.reject("loginFail", "아이디 또는 비밀번호가 맞지 않습니다.");
+            return "login/loginForm";
+        }
+
+        //로그인 성공 처리 TODO
+        //세션이 있으면 있는 세션 반환, 없으면 신규 세션을 생성해줌
+        //getSession에 true(기본값) : 세션이 있으면 기존 세션 반환, 세션이 없으면 신규 세션 생성 / false : 세션이 있으면 기존 세션 반환, 세션이 없으면 신규 세션을 생성x
+        HttpSession session = request.getSession();
+        //세션에 로그인 회원 정보 보관
+        session.setAttribute(SessionConst.LOGIN_MEMBER, loginMember); //세션에 여러개 값 저장 가능
+
+        return "redirect:" + redirectURL;
     }
 
     /*@PostMapping("/logout")*/
